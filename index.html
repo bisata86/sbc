@@ -45,11 +45,15 @@
       }
       .send {
         background: url('./imgs/clip.png');
-        background-size: 100% 100%;
+        background-size: 90% 90%;
+        background-position: center center;
+        background-repeat: no-repeat;
       }
       .key {
         background: url('./imgs/encryption.png');
-        background-size: 100% 100%;
+        background-size: 90% 90%;
+        background-position: center center;
+        background-repeat: no-repeat;
       }
       .messages {
         height: calc(100% - 50px);
@@ -90,7 +94,7 @@
             })
             Vue.component('bar-item', {
               props: ['all'],
-              template: '<div class="bar"><div @click="keySettings" class="key"></div><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send" class="send"></div></div>',
+              template: '<div class="bar"><div @click="keySettings" class="key"></div><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div  class="send"></div></div>',
               
               methods: {
                   keys: function (event) {
@@ -146,6 +150,11 @@
               methods: {
                   settingsDone:function(){
                     this.dataObj.status = 'chatting'
+                  },
+                  scrollToBottom:function(){
+                    setTimeout(function(){
+                       document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
+                    },100) 
                   }
                 }
             }) 
@@ -154,14 +163,11 @@
             });
             socket.on('message', function(data){
                 app.dataObj.messages.push(data)
-                document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
+                app.scrollToBottom()
             });
             socket.on('messages', function(data){
                 app.dataObj.messages = data
-                setTimeout(function(){
-                                  document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
-
-                },100)                
+                app.scrollToBottom()
             });
         }
    </script>
