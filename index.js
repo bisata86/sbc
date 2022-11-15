@@ -14,7 +14,7 @@ var users = [];
 var messages = [];
 io.on('connection', (socket) => {
   users.push(socket.id)
-  io.emit('console','user connected '+socket.id);
+  socket.emit('messages',messages);
   socket.on('send', function (data) {
       messages.push({text:data.text})
       io.emit('message',{text:data.text});

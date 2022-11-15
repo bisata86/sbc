@@ -3,7 +3,8 @@
    <head>
       <title>SBC</title>
    </head>
-   <script src = "/socket.io.js"></script>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.3/socket.io.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
    <style type="text/css">
@@ -20,15 +21,8 @@
         if (window.location.href.indexOf('localhost') != -1) {
             current = '//localhost:3000';
         }
-
         var socket = io.connect(current);
-
         var app;
-
-
-
-
-
         window.onload = function () {
 
             Vue.component('menu-item', {
@@ -54,13 +48,16 @@
             })
             Vue.component('bar-item', {
               props: ['all'],
-              template: '<div class="bar"><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send">send</div></div>',
+              template: '<div class="bar"><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send">send</div><div @click="keySettings">-key</div></div>',
               
               methods: {
                   keys: function (event) {
                     if(event.keyCode==13) {
                       this.send()
                     }
+                  },
+                  keySettings: function (event) {
+                    app.dataObj.status = 'settings'
                   },
                   send: function () {
                     var text = app.dataObj.currText;
@@ -97,32 +94,41 @@
                   secret: "",
                   currText: "",
                   messages : [],
-                  menuItems: []
+                  menuItems: [],
+                  status:'init'
                 }
               },
               created () {
-
+                this.dataObj.status = 'chatting'
               },
               methods: {
-                  
+                  settingsDone:function(){
+                    this.dataObj.status = 'chatting'
+                  }
                 }
             }) 
             socket.on('console', function(data){
                 console.log(data)
             });
             socket.on('message', function(data){
-                console.log(data)
                 app.dataObj.messages.push(data)
             });
+            socket.on('messages', function(data){
+                app.dataObj.messages = data
+            });
         }
-
    </script>
 
    <body>
       <div id="app">
-         <input  v-model="dataObj.secret"></input>
-         <messages-item v-bind:all="dataObj"></messages-item>
-         <bar-item v-bind:all="dataObj"></bar-item>
+         <div v-if="dataObj.status=='settings'">
+            <input  v-model="dataObj.secret"></input>
+            <div  @click="settingsDone">done</div>
+         </div>
+         <div v-if="dataObj.status=='chatting'">
+           <messages-item v-bind:all="dataObj"></messages-item>
+           <bar-item v-bind:all="dataObj"></bar-item>
+         </div>
          <transition name="fade">
             <div class="loader " v-if="dataObj.loader">
               <div class="panrelOverlay"></div>
