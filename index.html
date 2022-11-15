@@ -38,6 +38,7 @@
         border: 0;
         background: lightgray;
         height: 30px;
+        text-indent: 5px;
 
       }
       .send, .key {
@@ -47,9 +48,10 @@
       }
       .send {
         background: url('./imgs/clip.png');
-        background-size: 90% 90%;
+        background-size: 70% 70%;
         background-position: center center;
         background-repeat: no-repeat;
+        opacity: .5;
       }
       .key {
         background: url('./imgs/encryption.png');
@@ -63,6 +65,9 @@
         position: absolute;
         width: 100%;
         nobackground: lightgray;
+        background: url(./imgs/bg.gif);
+        background-size: auto 100%;
+        background-position: center center;
       }
       .messageContent {
         background: white;
@@ -76,6 +81,7 @@
         font-family: Arial, Helvetica, sans-serif;
         color:black;
         background: lightgray;
+        opacity: .8;
       }
       .author {
         font-size: xx-small;
@@ -98,6 +104,7 @@
             border: 0;
             background: lightgray;
             height: 30px;
+            text-indent: 5px;
       }
       .button {
           background-color: #4CAF50;
@@ -113,6 +120,9 @@
           width: 100%;
           box-sizing: border-box;
       }
+      ::-webkit-scrollbar {
+      display: none;
+    }
 
    </style>
    <script>
@@ -220,7 +230,7 @@
                 if(ret) {
                   this.dataObj.secret = ret
                 }
-
+                document.getElementById('app').style.display = "block"
                 
               },
               methods: {
@@ -257,7 +267,7 @@
    </script>
 
    <body>
-      <div id="app">
+      <div id="app" style="display:none;">
          <div class="settings" v-if="dataObj.status=='settings'">
             <div>Name</div>
             <input  v-model="dataObj.name"></input>
