@@ -23,6 +23,10 @@ io.on('connection', (socket) => {
       console.log(data)
       io.emit('message',data);
   });
+  socket.on('clear', function (data) {
+      messages = [];
+      io.emit('messages',[]);
+  });
   socket.on('disconnect', function () {
       users.splice(users.indexOf(socket.id), 1); 
       io.emit('console','user disconnected '+socket.id);

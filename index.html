@@ -71,9 +71,18 @@
         position: absolute;
         width: 100%;
         nobackground: lightgray;
-        /*background: url(./imgs/bg.gif);
+        background: url(./imgs/bg.gif);
         background-size: auto 100%;
-        background-position: center center;*/
+        background-position: center center;
+        animation-name: MOVE-BG;
+        animation-duration: 500s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;   
+      }
+      @keyframes MOVE-BG {
+          0%   {background-position: center left}
+        50%  {background-position: center right;}
+        100% {background-position: center left}
       }
       .messages img {
         max-height: 300px;
@@ -193,8 +202,12 @@
                   },
                   send: function () {
                     var text = app.dataObj.currText;
-                    text = CryptoJS.AES.encrypt(text, app.dataObj.secret).toString()
-                    socket.emit('send',{text:text,author:CryptoJS.AES.encrypt(app.dataObj.name, app.dataObj.secret).toString()})
+                    if(text=='clear') {
+                      socket.emit('clear')
+                    } else {
+                      text = CryptoJS.AES.encrypt(text, app.dataObj.secret).toString()
+                      socket.emit('send',{text:text,author:CryptoJS.AES.encrypt(app.dataObj.name, app.dataObj.secret).toString()})
+                    }
                     app.dataObj.currText = "";
                   },
                   keyup: function (a) {
@@ -260,6 +273,7 @@
                 }
                 document.getElementById('app').style.display = "block"
                 socket.emit('ready')
+                window.addEventListener("resize", this.scrollToBottom);
                 
               },
               methods: {
@@ -291,9 +305,10 @@
                     img.src = a;
                     img.onload = function (e)
                     {
-                        canvas.width = img.width
-                        canvas.height = img.height
-                        context.drawImage(img, 0, 0,img.width,img.height);
+                        var perc = img.width/img.height
+                        canvas.width = 200
+                        canvas.height = canvas.width/perc
+                        context.drawImage(img, 0, 0,canvas.width,canvas.height);
                         socket.emit('send',{
                           text:CryptoJS.AES.encrypt(canvas.toDataURL(), app.dataObj.secret).toString(),
                           author:CryptoJS.AES.encrypt(app.dataObj.name, app.dataObj.secret).toString()
