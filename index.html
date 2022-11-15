@@ -5,6 +5,15 @@
    </head>
    <script src = "/socket.io.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+   <style type="text/css">
+      .bar {
+         position: absolute;
+         bottom: 0;
+      }
+      .bar *  {
+         display: inline-block;
+      }
+   </style>
    <script>
          var current = 'https://sbc.onrender.com/';
         if (window.location.href.indexOf('localhost') != -1) {
@@ -42,12 +51,38 @@
                   
                 }
             })
-
+            Vue.component('bar-item', {
+              props: ['all'],
+              template: '<div class="bar"><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send">send</div></div>',
+              
+              methods: {
+                  keys: function (event) {
+                    if(event.keyCode==13) {
+                      this.send()
+                    }
+                  },
+                  send: function () {
+                    socket.emit('send',{text:app.dataObj.currText})
+                    app.dataObj.currText = "";
+                  },
+                  keyup: function (a) {
+                    if(a.onkeyup)
+                      a.onkeyup(a)
+                  },
+                  
+                }
+            })
+            Vue.component('messages-item', {
+              props: ['all'],
+              template: '<div class=""><div class="" v-for="message in all.messages">{{message.text}}</div></div>'
+            })
             app = new Vue({
               el: '#app',
               data: {
                 dataObj : {
-                 
+                  currText: "",
+                  messages : [],
+                  menuItems: []
                 }
               },
               created () {
@@ -62,11 +97,33 @@
             socket.on('console', function(data){
                 console.log(data)
             });
+            socket.on('message', function(data){
+                console.log(data)
+                app.dataObj.messages.push(data)
+            });
         }
 
    </script>
 
    <body>
-      <div id="app"></div>
+      <div id="app">
+         <messages-item v-bind:all="dataObj"></messages-item>
+         <bar-item v-bind:all="dataObj"></bar-item>
+         <transition name="fade">
+            <div class="loader " v-if="dataObj.loader">
+              <div class="panrelOverlay"></div>
+              <div class="lds-circle"><div></div></div>
+            </div>
+         </transition>
+         <div class="panrelOverlay" v-if="dataObj.menuItems.length" @click="dataObj.menuItems=[]"></div>
+         <div class="panel" v-if="dataObj.menuItems">
+            <menu-item
+            v-for="item in dataObj.menuItems"
+            v-bind:item="item"
+            v-bind:all="dataObj"
+            v-bind:key="item.id"
+            ></menu-item>
+         </div>
+      </div>
    </body>
 </html>

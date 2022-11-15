@@ -10,16 +10,32 @@ app.use(express.static(__dirname + '/', {
 app.get('/', function(req, res) {
    res.sendfile('index.html');
 });
+var users = [];
+var messages = [];
 io.on('connection', (socket) => {
-  console.log('user connected');
-  io.emit('console','user connected');
+  users.push(socket.id)
+  io.emit('console','user connected '+socket.id);
+  socket.on('send', function (data) {
+      messages.push({text:data.text})
+      io.emit('message',{text:data.text});
+  });
+  /*socket.on('getMessages', function (data) {
+      messages.push({text:data.text})
+  });*/
   socket.on('disconnect', function () {
-    console.log('user disconnected');
-      io.emit('console','user disconnected');
-
-
+      users.splice(users.indexOf(socket.id), 1); 
+      io.emit('console','user disconnected '+socket.id);
   });
 })
 server.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
+
+function findUser(sid) {
+    for (var i = 0; i < users.length; i++) {
+        if(users[i]==sid) {
+            return users[i];
+        }
+    }
+    return false;
+}
