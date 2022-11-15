@@ -12,8 +12,12 @@ app.get('/', function(req, res) {
 });
 io.on('connection', (socket) => {
   console.log('user connected');
+  io.emit('console','user connected');
   socket.on('disconnect', function () {
     console.log('user disconnected');
+      io.emit('console','user disconnected');
+
+
   });
 })
 server.listen(port, function() {

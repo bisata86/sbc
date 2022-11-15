@@ -1,18 +1,72 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>Hello world</title>
+      <title>SBC</title>
    </head>
    <script src = "/socket.io.js"></script>
-   
-   
+   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
    <script>
-      var current = 'https://sbc.onrender.com/';
+         var current = 'https://sbc.onrender.com/';
         if (window.location.href.indexOf('localhost') != -1) {
             current = '//localhost:3000';
         }
 
         var socket = io.connect(current);
+
+        var app;
+
+
+
+
+
+        window.onload = function () {
+
+            Vue.component('menu-item', {
+              props: ['item','all'],
+              template: '<div v-on:keyup.enter="keyup(item)" :class="item.class">{{item.text}}<div @click="action(item)" v-if="item.html" v-html="item.html" :class="{ panelButton : item.onclick}"></div><input class="loginInput" placeholder="Login" :class="{ error : all.passwordError}" v-if="item.login" v-model="all.password" ></input></div>',
+              created() {
+                $('body').addClass('noscroll')
+              },
+              destroyed() {
+                $('body').removeClass('noscroll')
+              },
+              methods: {
+                  action: function (a) {
+                    if(a.onclick)
+                      a.onclick()
+                  },
+                  keyup: function (a) {
+                    if(a.onkeyup)
+                      a.onkeyup(a)
+                  },
+                  
+                }
+            })
+
+            app = new Vue({
+              el: '#app',
+              data: {
+                dataObj : {
+                 
+                }
+              },
+              created () {
+
+              },
+              methods: {
+                  sugg: function (event) {
+                   
+                  }
+                }
+            }) 
+            socket.on('console', function(data){
+                console.log(data)
+            });
+        }
+
    </script>
-   <body>Hello</body>
+
+   <body>
+      <div id="app"></div>
+   </body>
 </html>
