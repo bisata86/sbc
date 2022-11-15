@@ -4,7 +4,7 @@ var http = require('http').Server(app);
 var express = require('express');
 var io = require('socket.io')(http);
 
-app.use(express.static(__dirname + '/public', {
+app.use(express.static(__dirname + '/', {
     maxage: process.env.NODE_ENV == "production" ? '0d' : '0d'
 })) 
 
