@@ -182,10 +182,24 @@
               },
               created () {
                 this.dataObj.status = 'chatting'
-                this.dataObj.name = '#'+Math.floor((Math.random()*1000)+1)
+
+                var ret = localStorage.getItem('bscname')
+                if(ret) {
+                  this.dataObj.name = ret
+                } else {
+                  this.dataObj.name = '#'+Math.floor((Math.random()*1000)+1)
+                }
+                var ret = localStorage.getItem('bscsecret')
+                if(ret) {
+                  this.dataObj.secret = ret
+                }
+
+                
               },
               methods: {
                   settingsDone:function(){
+                    localStorage.setItem('bscname',app.dataObj.name)
+                    localStorage.setItem('bscsecret',app.dataObj.secret)
                     this.dataObj.status = 'chatting'
                     this.scrollToBottom();
                   },
