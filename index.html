@@ -23,7 +23,9 @@
          width: 100%;
          padding: 5px;
          box-sizing: border-box;
-         height: 50px;
+         height: 40px;
+         box-shadow: 
+        inset 0px 11px 8px -10px #CCC;
       }
       .bar *  {
          display: inline-block;
@@ -51,16 +53,16 @@
       }
       .key {
         background: url('./imgs/encryption.png');
-        background-size: 90% 90%;
+        background-size: 70% 70%;
         background-position: center center;
         background-repeat: no-repeat;
       }
       .messages {
-        height: calc(100% - 50px);
+        height: calc(100% - 40px);
         overflow: scroll;
         position: absolute;
         width: 100%;
-        background: lightgray;
+        nobackground: lightgray;
       }
       .messageContent {
         background: white;
@@ -73,7 +75,7 @@
         box-sizing: border-box;
         font-family: Arial, Helvetica, sans-serif;
         color:black;
-       
+        background: lightgray;
       }
       .author {
         font-size: xx-small;
@@ -85,6 +87,31 @@
       }
       .clearfix {
         clear: both;
+      }
+      .settings {
+        padding: 10px;
+      }
+      .settings input {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            background: lightgray;
+            height: 30px;
+      }
+      .button {
+          background-color: #4CAF50;
+          border: none;
+          color: white;
+          padding: 15px 32px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 16px;
+          margin-top: 10px;
+          cursor: pointer;
+          width: 100%;
+          box-sizing: border-box;
       }
 
    </style>
@@ -203,6 +230,11 @@
                     this.dataObj.status = 'chatting'
                     this.scrollToBottom();
                   },
+                  clearAll:function(){
+                    localStorage.removeItem('bscname')
+                    localStorage.removeItem('bscsecret')
+                    window.location.reload();
+                  },
                   scrollToBottom:function(){
                     setTimeout(function(){
                        document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
@@ -226,33 +258,19 @@
 
    <body>
       <div id="app">
-         <div v-if="dataObj.status=='settings'">
-            <div>Passphrase</div>
-            <input  v-model="dataObj.secret"></input>
+         <div class="settings" v-if="dataObj.status=='settings'">
             <div>Name</div>
             <input  v-model="dataObj.name"></input>
-            <div  @click="settingsDone">done</div>
+            <div>Encryption key</div>
+            <input  v-model="dataObj.secret"></input>
+            <div  @click="settingsDone" class="button">OK</div>
+            <div  @click="clearAll" class="button">CLEAR ALL</div>
          </div>
          <div v-if="dataObj.status=='chatting'">
            <div class="messages" id="messages">
              <messages-item  v-bind:all="dataObj"></messages-item>
            </div>
            <bar-item v-bind:all="dataObj"></bar-item>
-         </div>
-         <transition name="fade">
-            <div class="loader " v-if="dataObj.loader">
-              <div class="panrelOverlay"></div>
-              <div class="lds-circle"><div></div></div>
-            </div>
-         </transition>
-         <div class="panrelOverlay" v-if="dataObj.menuItems.length" @click="dataObj.menuItems=[]"></div>
-         <div class="panel" v-if="dataObj.menuItems">
-            <menu-item
-            v-for="item in dataObj.menuItems"
-            v-bind:item="item"
-            v-bind:all="dataObj"
-            v-bind:key="item.id"
-            ></menu-item>
          </div>
       </div>
    </body>
