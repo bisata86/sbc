@@ -72,17 +72,18 @@
         width: 100%;
         nobackground: lightgray;
         background: url(./imgs/bg.gif);
-        background-size: auto 100%;
-        background-position: center center;
+        background-size: auto 500px;
+        background-repeat: no-repeat;
         animation-name: MOVE-BG;
-        animation-duration: 500s;
+        animation-duration: 1500s;
         animation-timing-function: linear;
         animation-iteration-count: infinite;   
+        background-color: black;
       }
       @keyframes MOVE-BG {
-          0%   {background-position: center left}
-        50%  {background-position: center right;}
-        100% {background-position: center left}
+          0%   {background-position: bottom left}
+        50%  {background-position: bottom right;}
+        100% {background-position: bottom left}
       }
       .messages img {
         max-height: 300px;
