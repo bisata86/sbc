@@ -5,6 +5,7 @@
    </head>
    <script src = "/socket.io.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
    <style type="text/css">
       .bar {
          position: absolute;
@@ -62,7 +63,9 @@
                     }
                   },
                   send: function () {
-                    socket.emit('send',{text:app.dataObj.currText})
+                    var text = app.dataObj.currText;
+                    text = CryptoJS.AES.encrypt(text, app.dataObj.secret).toString()
+                    socket.emit('send',{text:text})
                     app.dataObj.currText = "";
                   },
                   keyup: function (a) {
@@ -74,12 +77,24 @@
             })
             Vue.component('messages-item', {
               props: ['all'],
-              template: '<div class=""><div class="" v-for="message in all.messages">{{message.text}}</div></div>'
+              template: '<div class=""><div class="" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
+              methods: {
+               decript: function (text) {
+                     var r = "";
+                     try {
+                        r = CryptoJS.AES.decrypt(text, app.dataObj.secret).toString(CryptoJS.enc.Utf8);
+                     } catch(e) {
+                        r = ""
+                     }
+                     return r;
+                  }
+              }
             })
             app = new Vue({
               el: '#app',
               data: {
                 dataObj : {
+                  secret: "",
                   currText: "",
                   messages : [],
                   menuItems: []
@@ -89,9 +104,7 @@
 
               },
               methods: {
-                  sugg: function (event) {
-                   
-                  }
+                  
                 }
             }) 
             socket.on('console', function(data){
@@ -107,6 +120,7 @@
 
    <body>
       <div id="app">
+         <input  v-model="dataObj.secret"></input>
          <messages-item v-bind:all="dataObj"></messages-item>
          <bar-item v-bind:all="dataObj"></bar-item>
          <transition name="fade">
