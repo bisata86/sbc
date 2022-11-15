@@ -8,12 +8,52 @@
    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
    <style type="text/css">
+     
+   </style>
+
+   <style type="text/css">
+      body {
+        padding: 0;
+        margin: 0;
+        border: 0;
+      }
       .bar {
          position: absolute;
          bottom: 0;
+         width: 100%;
+         padding: 5px;
+         box-sizing: border-box;
+         height: 50px;
       }
       .bar *  {
          display: inline-block;
+         vertical-align: middle;
+      }
+      .inputText {
+        width: calc(100% - 60px);
+        padding: 0;
+        margin: 0;
+        border: 0;
+        background: lightgray;
+        height: 30px;
+
+      }
+      .send, .key {
+        width: 30px;
+        height: 30px;
+        background: red;
+      }
+      .send {
+        background: url('./imgs/clip.png');
+        background-size: 100% 100%;
+      }
+      .key {
+        background: url('./imgs/encryption.png');
+        background-size: 100% 100%;
+      }
+      .messages {
+        height: calc(100vh - 50px);
+        overflow: scroll;
       }
    </style>
    <script>
@@ -48,7 +88,7 @@
             })
             Vue.component('bar-item', {
               props: ['all'],
-              template: '<div class="bar"><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send">send</div><div @click="keySettings">-key</div></div>',
+              template: '<div class="bar"><div @click="keySettings" class="key"></div><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div @click="send" class="send"></div></div>',
               
               methods: {
                   keys: function (event) {
@@ -74,7 +114,7 @@
             })
             Vue.component('messages-item', {
               props: ['all'],
-              template: '<div class=""><div class="" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
+              template: '<div class="messagess" id="messagess"><div class="" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
               methods: {
                decript: function (text) {
                      var r = "";
@@ -112,9 +152,14 @@
             });
             socket.on('message', function(data){
                 app.dataObj.messages.push(data)
+                document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
             });
             socket.on('messages', function(data){
                 app.dataObj.messages = data
+                setTimeout(function(){
+                                  document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
+
+                },100)                
             });
         }
    </script>
@@ -126,7 +171,9 @@
             <div  @click="settingsDone">done</div>
          </div>
          <div v-if="dataObj.status=='chatting'">
-           <messages-item v-bind:all="dataObj"></messages-item>
+           <div class="messages" id="messages">
+             <messages-item  v-bind:all="dataObj"></messages-item>
+           </div>
            <bar-item v-bind:all="dataObj"></bar-item>
          </div>
          <transition name="fade">
