@@ -62,7 +62,7 @@
         width: 100%;
         background: lightgray;
       }
-      .message {
+      .messageContent {
         background: white;
         margin: 5px;
         border-radius: 10px 10px 10px 0;
@@ -73,7 +73,20 @@
         box-sizing: border-box;
         font-family: Arial, Helvetica, sans-serif;
         color:black;
+       
       }
+      .author {
+        font-size: xx-small;
+      }
+      .mine {
+        background: lightgreen;
+        border-radius: 10px 10px 0px 10px;
+        float: right;
+      }
+      .clearfix {
+        clear: both;
+      }
+
    </style>
    <script>
          var current = 'https://sbc.onrender.com/';
@@ -121,7 +134,7 @@
                   send: function () {
                     var text = app.dataObj.currText;
                     text = CryptoJS.AES.encrypt(text, app.dataObj.secret).toString()
-                    socket.emit('send',{text:text})
+                    socket.emit('send',{text:text,author:CryptoJS.AES.encrypt(app.dataObj.name, app.dataObj.secret).toString()})
                     app.dataObj.currText = "";
                   },
                   keyup: function (a) {
@@ -133,7 +146,16 @@
             })
             Vue.component('messages-item', {
               props: ['all'],
-              template: '<div class="messagess" id="messagess"><div class="message" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
+              template: ''+
+              '<div class="messagess" id="messagess">'+
+              '<div class="message"  v-for="message in all.messages" v-if="decript(message.text)">'+
+              '<div class="messageContent" :class="{ mine : decript(message.author)==all.name}">'+
+              '{{decript(message.text)}}'+
+              '<div class="author" v-html="decript(message.author)"></div>'+
+              '</div>'+
+              '<div class="clearfix"></div>'+
+              '</div>'+
+              '</div>',
               methods: {
                decript: function (text) {
                      var r = "";
@@ -150,6 +172,7 @@
               el: '#app',
               data: {
                 dataObj : {
+                  name : "",
                   secret: "",
                   currText: "",
                   messages : [],
@@ -159,15 +182,17 @@
               },
               created () {
                 this.dataObj.status = 'chatting'
+                this.dataObj.name = '#'+Math.floor((Math.random()*1000)+1)
               },
               methods: {
                   settingsDone:function(){
                     this.dataObj.status = 'chatting'
+                    this.scrollToBottom();
                   },
                   scrollToBottom:function(){
                     setTimeout(function(){
                        document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
-                    },100) 
+                    },10) 
                   }
                 }
             }) 
@@ -188,7 +213,10 @@
    <body>
       <div id="app">
          <div v-if="dataObj.status=='settings'">
+            <div>Passphrase</div>
             <input  v-model="dataObj.secret"></input>
+            <div>Name</div>
+            <input  v-model="dataObj.name"></input>
             <div  @click="settingsDone">done</div>
          </div>
          <div v-if="dataObj.status=='chatting'">

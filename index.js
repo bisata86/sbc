@@ -16,9 +16,9 @@ io.on('connection', (socket) => {
   users.push(socket.id)
   socket.emit('messages',messages);
   socket.on('send', function (data) {
-      messages.push({text:data.text})
+      messages.push(data)
       console.log(data.text)
-      io.emit('message',{text:data.text});
+      io.emit('message',data);
   });
   socket.on('disconnect', function () {
       users.splice(users.indexOf(socket.id), 1); 
