@@ -59,15 +59,25 @@
         background-position: center center;
         background-repeat: no-repeat;
       }
+      .key.active {
+        background: url('./imgs/encryptionok.png');
+        background-size: 70% 70%;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
       .messages {
         height: calc(100% - 40px);
         overflow: scroll;
         position: absolute;
         width: 100%;
         nobackground: lightgray;
-        background: url(./imgs/bg.gif);
+        /*background: url(./imgs/bg.gif);
         background-size: auto 100%;
-        background-position: center center;
+        background-position: center center;*/
+      }
+      .messages img {
+        max-height: 300px;
+        max-width: 100%;
       }
       .messageContent {
         background: white;
@@ -83,7 +93,7 @@
         background: lightgray;
         opacity: .8;
       }
-      .author {
+      .author, .time {
         font-size: xx-small;
       }
       .mine {
@@ -123,6 +133,9 @@
       ::-webkit-scrollbar {
       display: none;
     }
+    #canvas, #file {
+          display: none;
+    }
 
    </style>
    <script>
@@ -157,14 +170,24 @@
             })
             Vue.component('bar-item', {
               props: ['all'],
-              template: '<div class="bar"><div @click="keySettings" class="key"></div><input class="inputText" placeholder="" :class="{ error : all.passwordError}" v-model="all.currText" v-on:keyup="keys" ></input><div  class="send"></div></div>',
+              template: '<div class="bar"><div @click="keySettings" :class="{ active : all.secret}" class="key"></div><input class="inputText" placeholder=""  v-model="all.currText" v-on:keyup="keys" ></input><div @click="smildone"  class="send"><input id="file" type="file" @change="previewFiles" multiple></div></div>',
               
               methods: {
+                  smildone:function() {
+                    document.getElementById('file').click()
+                  },
                   keys: function (event) {
                     if(event.keyCode==13) {
                       this.send()
                     }
                   },
+                  previewFiles(event) {
+                      console.log(event.target.files);
+                      const file = event.target.files[0];
+                      console.log(URL.createObjectURL(file));
+                      app.dataObj.canvasUrl = URL.createObjectURL(file)
+                      app.sendImage(app.dataObj.canvasUrl)
+                   },
                   keySettings: function (event) {
                     app.dataObj.status = 'settings'
                   },
@@ -187,8 +210,11 @@
               '<div class="messagess" id="messagess">'+
               '<div class="message"  v-for="message in all.messages" v-if="decript(message.text)">'+
               '<div class="messageContent" :class="{ mine : decript(message.author)==all.name}">'+
-              '{{decript(message.text)}}'+
+              '<div v-if="message.text.length<500">{{decript(message.text)}}</div>'+  
+              '<div v-if="message.text.length>500"><img :src="decript(message.text)"></img></div>'+  
+              
               '<div class="author" v-html="decript(message.author)"></div>'+
+              '<div class="time" v-html="new Date(message.time).toLocaleString()"></div>'+
               '</div>'+
               '<div class="clearfix"></div>'+
               '</div>'+
@@ -214,7 +240,9 @@
                   currText: "",
                   messages : [],
                   menuItems: [],
-                  status:'init'
+                  status:'init',
+                  canvasUrl: '',
+                  canvas:{}
                 }
               },
               created () {
@@ -231,6 +259,7 @@
                   this.dataObj.secret = ret
                 }
                 document.getElementById('app').style.display = "block"
+                socket.emit('ready')
                 
               },
               methods: {
@@ -249,6 +278,28 @@
                     setTimeout(function(){
                        document.getElementById("messages").scrollTop = document.getElementById("messagess").offsetHeight;
                     },10) 
+                  },
+                  sendImage:function(a){
+                    // console.log(a)
+                    // const canvas = document.getElementById("canvas");
+                    // const ctx = canvas.getContext("2d");
+                    // ctx.drawImage(a, 0, 0);
+                    canvas  = document.getElementById("canvas");
+                    context = canvas.getContext('2d');
+
+                    img = new Image();
+                    img.src = a;
+                    img.onload = function (e)
+                    {
+                        canvas.width = img.width
+                        canvas.height = img.height
+                        context.drawImage(img, 0, 0,img.width,img.height);
+                        socket.emit('send',{
+                          text:CryptoJS.AES.encrypt(canvas.toDataURL(), app.dataObj.secret).toString(),
+                          author:CryptoJS.AES.encrypt(app.dataObj.name, app.dataObj.secret).toString()
+                        })
+                        
+                    }
                   }
                 }
             }) 
@@ -260,6 +311,7 @@
                 app.scrollToBottom()
             });
             socket.on('messages', function(data){
+                console.log(data)
                 app.dataObj.messages = data
                 app.scrollToBottom()
             });
@@ -268,6 +320,8 @@
 
    <body>
       <div id="app" style="display:none;">
+         <!-- <img :src="dataObj.canvasUrl" @load="sendImage(this)"><img> -->
+         <canvas id="canvas"></canvas>
          <div class="settings" v-if="dataObj.status=='settings'">
             <div>Name</div>
             <input  v-model="dataObj.name"></input>

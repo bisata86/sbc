@@ -14,10 +14,13 @@ var users = [];
 var messages = [];
 io.on('connection', (socket) => {
   users.push(socket.id)
-  socket.emit('messages',messages);
+  socket.on('ready', function (data) {
+      socket.emit('messages',messages);
+  });
   socket.on('send', function (data) {
+      data.time = new Date().getTime()
       messages.push(data)
-      console.log(data.text)
+      console.log(data)
       io.emit('message',data);
   });
   socket.on('disconnect', function () {
