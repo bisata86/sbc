@@ -2,17 +2,25 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var express = require('express');
+var io = require('socket.io')(http);
+
+app.use(express.static(__dirname + '/public', {
+    maxage: process.env.NODE_ENV == "production" ? '0d' : '0d'
+})) 
+
 var port = process.env.PORT || 3000;
-
-
-app.use(express.static(__dirname + '/', {
-    maxage: process.env.IS_STAGING == 'true' ? '1m' : '1d'
-}))
 app.get('/', function(req, res){
   res.sendfile('index.html');
 });
+
 app.listen(port, function() {
-    console.log('surv on port: ' + port)
+    console.log('sbc up on port: ' + port)
 });
-
-
+//io.set('origins', '*:*');
+io.on('connection', function(socket) {
+   console.log('A user connected');
+   //Whenever someone disconnects this piece of code executed
+   socket.on('disconnect', function () {
+      console.log('A user disconnected');
+   });
+});
