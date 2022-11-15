@@ -60,6 +60,19 @@
         overflow: scroll;
         position: absolute;
         width: 100%;
+        background: lightgray;
+      }
+      .message {
+        background: white;
+        margin: 5px;
+        border-radius: 10px 10px 10px 0;
+        padding: 10px;
+        width: max-content;
+        max-width: calc(100% - 10px);
+        word-break: break-all;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+        color:black;
       }
    </style>
    <script>
@@ -120,7 +133,7 @@
             })
             Vue.component('messages-item', {
               props: ['all'],
-              template: '<div class="messagess" id="messagess"><div class="" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
+              template: '<div class="messagess" id="messagess"><div class="message" v-for="message in all.messages" v-if="decript(message.text)" v-html="decript(message.text)"></div></div>',
               methods: {
                decript: function (text) {
                      var r = "";
