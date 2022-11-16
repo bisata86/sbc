@@ -58,12 +58,14 @@
         background-size: 70% 70%;
         background-position: center center;
         background-repeat: no-repeat;
+        opacity: .5;
       }
       .key.active {
         background: url('./imgs/encryptionok.png');
         background-size: 70% 70%;
         background-position: center center;
         background-repeat: no-repeat;
+
       }
       .messages {
         height: calc(100% - 40px);
@@ -71,14 +73,11 @@
         position: absolute;
         width: 100%;
         nobackground: lightgray;
-        background: url(./imgs/bg.gif);
-        background-size: auto 900px;
+        background: url(./imgs/leaf.png);
+        background-size: 200px 200px;
         background-repeat: no-repeat;
-        animation-name: MOVE-BG;
-        animation-duration: 1500s;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;   
-        background-color: black;
+        background-color: whitesmoke;
+        background-position: center center;
       }
       @keyframes MOVE-BG {
           0%   {background-position: bottom left}
@@ -125,9 +124,10 @@
             background: lightgray;
             height: 30px;
             text-indent: 5px;
+            outline-width: 0;
       }
       .button {
-          background-color: #4CAF50;
+          background-color: black;
           border: none;
           color: white;
           padding: 15px 32px;
@@ -138,6 +138,7 @@
           margin-top: 10px;
           cursor: pointer;
           width: 100%;
+          border-radius: 10px;
           box-sizing: border-box;
       }
       ::-webkit-scrollbar {
@@ -145,6 +146,14 @@
     }
     #canvas, #file {
           display: none;
+    }
+    .label {
+      font-size: xx-small;
+      position: relative;
+      top: 5px;
+      background: lightgray;
+      width: max-content;
+      padding: 2px 10px 0 10px;
     }
 
    </style>
@@ -256,7 +265,8 @@
                   menuItems: [],
                   status:'init',
                   canvasUrl: '',
-                  canvas:{}
+                  canvas:{},
+                  countUsers:0,
                 }
               },
               created () {
@@ -279,6 +289,7 @@
               },
               methods: {
                   settingsDone:function(){
+                    if(!app.dataObj.name) app.dataObj.name = '#'+Math.floor((Math.random()*1000)+1)
                     localStorage.setItem('bscname',app.dataObj.name)
                     localStorage.setItem('bscsecret',app.dataObj.secret)
                     this.dataObj.status = 'chatting'
@@ -326,6 +337,9 @@
                 app.dataObj.messages.push(data)
                 app.scrollToBottom()
             });
+            socket.on('countUsers', function(data){
+                app.dataObj.countUsers = data
+            });
             socket.on('messages', function(data){
                 console.log(data)
                 app.dataObj.messages = data
@@ -339,10 +353,11 @@
          <!-- <img :src="dataObj.canvasUrl" @load="sendImage(this)"><img> -->
          <canvas id="canvas"></canvas>
          <div class="settings" v-if="dataObj.status=='settings'">
-            <div>Name</div>
+            <div>Online users -  {{dataObj.countUsers}}</div>
+            <div class="label">Name</div>
             <input  v-model="dataObj.name"></input>
-            <div>Encryption key</div>
-            <input  v-model="dataObj.secret"></input>
+            <div  class="label">Encryption key</div>
+            <input placeholder="None"  v-model="dataObj.secret"></input>
             <div  @click="settingsDone" class="button">OK</div>
             <div  @click="clearAll" class="button">CLEAR ALL</div>
          </div>
