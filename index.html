@@ -297,6 +297,7 @@
                   clearAll:function(){
                     localStorage.removeItem('bscname')
                     localStorage.removeItem('bscsecret')
+                    socket.emit('clear')
                     window.location.reload();
                   },
                   scrollToBottom:function(){

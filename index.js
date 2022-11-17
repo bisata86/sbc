@@ -7,7 +7,11 @@ const port = process.env.PORT || 3000;
 app.use(express.static(__dirname + '/', {
     maxage: process.env.NODE_ENV == "production" ? '0d' : '0d'
 })) 
-app.get('/', function(req, res) {
+app.get('*', function(req, res) {
+   if(req.url) {
+     var room = req.url
+     console.log(room)
+   }
    res.sendfile('index.html');
 });
 var users = [];
@@ -16,20 +20,45 @@ io.on('connection', (socket) => {
   users.push(socket.id)
   io.emit('countUsers',users.length);
   socket.on('ready', function (data) {
-      socket.emit('messages',messages);
+      var r = socket.handshake.headers.referer
+      var room = 'all'
+      if(r[r.length-1]!='/') {
+        var u = r.split('/')
+        room = u[u.length-1]
+      }
+      socket.join(room);
+      socket.emit('messages',roomFilter(messages,room));
   });
   socket.on('send', function (data) {
       data.time = new Date().getTime()
       messages.push(data)
-      console.log(data)
-      io.emit('message',data);
+      var r = socket.handshake.headers.referer
+      var room = 'all'
+      if(r[r.length-1]!='/') {
+        var u = r.split('/')
+        room = u[u.length-1]
+      }
+      data.room = room
+      io.to(room).emit('message',data);
   });
   socket.on('countUsers', function (data) {
       io.emit('countUsers',users.length);
   });
   socket.on('clear', function (data) {
-      messages = [];
-      io.emit('messages',[]);
+    var r = socket.handshake.headers.referer
+      var room = 'all'
+      if(r[r.length-1]!='/') {
+        var u = r.split('/')
+        room = u[u.length-1]
+      }
+      var newMessages = []
+      for (var i = 0; i < messages.length; i++) {
+        if(messages[i].room!=room) {
+          newMessages.push(messages[i])
+        }
+      }
+      messages = newMessages;
+      io.to(room).emit('messages',[]);
   });
   socket.on('disconnect', function () {
       users.splice(users.indexOf(socket.id), 1); 
@@ -40,6 +69,16 @@ io.on('connection', (socket) => {
 server.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
+
+function roomFilter(messages,room) {
+  var newMessages = [];
+  for (var i = 0; i < messages.length; i++) {
+    if(messages[i].room==room) {
+      newMessages.push(messages[i])
+    }
+  }
+  return newMessages;
+}
 
 function findUser(sid) {
     for (var i = 0; i < users.length; i++) {
