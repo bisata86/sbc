@@ -332,15 +332,7 @@
             }) 
             socket.on('console', function(data){
                 console.log(data)
-                console = {log:function(a) {
-                  for (var i = 0; i < a.length; i++) {
-                    var oImg = document.createElement("img");
-                    oImg.setAttribute('src', a[i]);
-                    oImg.setAttribute('height', '200px');
-                    oImg.setAttribute('width', '100px');
-                    document.body.appendChild(oImg);
-                  }
-                }}
+                
             });
             socket.on('message', function(data){
                 app.dataObj.messages.push(data)
