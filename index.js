@@ -16,6 +16,7 @@ app.get('*', function(req, res) {
 });
 var users = [];
 var messages = [];
+var logs = [];
 io.on('connection', (socket) => {
   users.push(socket.id)
   io.emit('countUsers',users.length);
@@ -43,6 +44,13 @@ io.on('connection', (socket) => {
   });
   socket.on('countUsers', function (data) {
       io.emit('countUsers',users.length);
+  });
+  socket.on('log', function (data) {
+    logs.push(data)
+    console.log(data)
+  });
+  socket.on('getlog', function (data) {
+    socket.emit(logs)
   });
   socket.on('clear', function (data) {
     var r = socket.handshake.headers.referer
