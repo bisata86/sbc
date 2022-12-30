@@ -50,7 +50,7 @@ io.on('connection', (socket) => {
     console.log(data)
   });
   socket.on('getlog', function (data) {
-    socket.emit(logs)
+    socket.emit('console',logs)
   });
   socket.on('clear', function (data) {
     var r = socket.handshake.headers.referer
