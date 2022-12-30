@@ -61,6 +61,7 @@ io.on('connection', (socket) => {
     socket.emit('console',logs)
   });
   socket.on('clear', function (data) {
+    logs = [];
     var r = socket.handshake.headers.referer
       var room = 'all'
       if(r[r.length-1]!='/') {
@@ -75,6 +76,7 @@ io.on('connection', (socket) => {
       }
       messages = newMessages;
       io.to(room).emit('messages',[]);
+
   });
   socket.on('disconnect', function () {
       users.splice(users.indexOf(socket.id), 1); 
