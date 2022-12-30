@@ -4,9 +4,13 @@ var app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const port = process.env.PORT || 3000;
+var cors = require('cors');
 app.use(express.static(__dirname + '/', {
     maxage: process.env.NODE_ENV == "production" ? '0d' : '0d'
 })) 
+app.use(cors({
+    origin: '*'
+}));
 app.get('*', function(req, res) {
    if(req.url) {
      var room = req.url
