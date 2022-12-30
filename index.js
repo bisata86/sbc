@@ -2,7 +2,11 @@
 var express = require('express');
 var app = express();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server,{
+  cors: {
+    origin: '*',
+  }
+});
 const port = process.env.PORT || 3000;
 var cors = require('cors');
 app.use(express.static(__dirname + '/', {
